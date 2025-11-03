@@ -40,10 +40,10 @@ This repo shows a **fast, reproducible path** from data → returns → correlat
 ## Results (highlights)
 
 **(1) Share price trend (2021–2024)**  
-![Share price trend](results/1_share_price_trend.png)
+
 
 **(2) Correlation heatmap (daily returns)**  
-![Correlation heatmap](results/2_correlation_heatmap.png)
+
 
 **What the plots show (from your outputs):**
 - **Diversification:** Financials/Staples (e.g., `JPM`, `KO`) move **less** with mega-cap Tech than Tech names move with each other.  
