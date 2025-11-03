@@ -1,11 +1,21 @@
 # Finance Case Study — Multi-Ticker Exploratory
 
 **Objective**  
-Turn raw daily prices into a small set of **decision-ready views**: price trends, return correlations, and a lightweight portfolio check for a mixed basket (Tech, Financials, Staples) vs **S&P 500**.
+Turn raw daily prices into **decision-ready views**: price trends, return correlations, and a quick diversification read for a mixed basket vs **S&P 500**.
 
 **Business case (why this exists)**  
-A PM or CFO asks, “How are our names moving vs the market, and what actually diversifies us?”  
-This repo shows the **fastest reproducible path** from data → returns → correlations → takeaways that can drop into a slide or dashboard the same day.
+A PM/CFO asks, “How are our names moving vs the market, and what actually diversifies us?”  
+This repo shows a **fast, reproducible path** from data → returns → correlations → takeaways you can drop into a slide the same day.
+
+---
+
+## Universe & Horizon
+
+- **Tickers shown in the analysis**
+  - Trend/returns: `XOM`, `AAPL`, `JPM`, `KO`, `^GSPC`
+  - Correlations: `AAPL`, `AMZN`, `GOOGL`, `JPM`, `^GSPC`
+- **Dates:** `2021-01-01` → `2024-01-31`
+- **Source:** Yahoo Finance via `yfinance` (Stooq fallback optional)
 
 ---
 
@@ -17,42 +27,50 @@ finance-case-study/
 ├─ .gitignore
 ├─ notebooks/
 │ └─ Finance_case_study.ipynb
-├─ data/ # (optional) cached price CSVs
+├─ data/ # (optional) cached prices
 │ └─ .gitkeep
-└─ results/ # export your screenshots here
-├─ 1_share_price_trend.png # ← paste Screenshot (1)
-└─ 2_correlation_heatmap.png # ← paste Screenshot (2)
+└─ results/ # export screenshots here
+├─ 1_share_price_trend.png 
+├─ 2_correlation_heatmap.png 
+└─ 3_rolling_returns_smooth.png 
 
-## Universe & Horizon
+## Approach
 
-- **Tickers:** `AAPL`, `AMZN`, `GOOGL`, `JPM`, `KO`, `^GSPC`  
-- **Dates:** `2021-01-01` → `2024-01-31`  
-- **Source:** Yahoo Finance (`yfinance`) with a Stooq fallback (for blocked/ratelimited calls)
+- **Data sourcing**
+  - Pull daily OHLCV with `yfinance`; align calendars and de-duplicate dates.
+- **Cleaning & prep**
+  - Use **Adj Close** (preferred) or Close → build a wide prices matrix.
+  - Sanity checks for missing/duplicate dates (no forward-fill for returns).
+- **Returns & risk**
+  - Daily % returns, cumulative returns; rolling 20-day volatility (optional).
+- **Correlation & diversification**
+  - Correlation on daily returns to understand co-movement and diversification.
+- **Visualization**
+  - Price trend line chart; correlation heatmap; optional smoothed (100-day) returns.
+- **Reproducibility**
+  - Single notebook; figures saved to `/results`; env pinned via `requirements.txt`.
 
 ---
 
-## What the notebook does
-
-1. **Ingest**: download OHLCV, align trading days.  
-2. **Prep**: build a clean **Close/Adj Close** matrix; handle NAs; sanity checks.  
-3. **Returns & Risk**: daily returns, cumulative returns, rolling volatility.  
-4. **Correlation**: cross-asset correlation matrix to reason about diversification.  
-5. **(Optional) Portfolio**: equal-weight basket vs **^GSPC**.
-
----
-
-## Results (short highlights)
+## Results (highlights)
 
 **(1) Share price trend (2021–2024)**  
-![Share price trend](results/1_share_price_trend.png)
+
+
 
 **(2) Correlation heatmap (daily returns)**  
-![Correlation heatmap](results/2_correlation_heatmap.png)
 
-**Example takeaways (replace with your own after running):**
-- Tech names (**AAPL/AMZN/GOOGL**) move together; **KO** and **JPM** reduce basket correlation.  
-- Over this window, **AAPL** outran **JPM**; **^GSPC** sits near the basket median risk/return.  
-- Highest rolling volatility: **AMZN/GOOGL**; lowest: **KO**.
+
+**What the plots show (from your outputs):**
+- **Diversification:** Financials/Staples (e.g., `JPM`, `KO`) move **less** with mega-cap Tech than Tech names move with each other.  
+- **Correlations vs S&P 500:** `AAPL` ≈ **0.80**, `AMZN` ≈ **0.71**, `GOOGL` ≈ **0.75**, `JPM` ≈ **0.63**.  
+- **Within-Tech:** `AAPL–AMZN` ≈ **0.61**, `AAPL–GOOGL` ≈ **0.66**, `AMZN–GOOGL` ≈ **0.66** (high co-movement).  
+- **Lower pairwise with JPM:** `AAPL–JPM` ≈ **0.36**, `AMZN–JPM` ≈ **0.31**, `GOOGL–JPM` ≈ **0.34** → helpful for reducing basket variance.
+
+<details>
+
+
+
 
 ---
 
@@ -63,3 +81,39 @@ finance-case-study/
 pip install -r requirements.txt
 # or
 pip install pandas matplotlib seaborn yfinance pandas-datareader
+
+## Next Steps
+
+- **Performance table**
+  - Compute and export `results/perf_summary.csv` with: CAGR, annualized stdev, max drawdown, and simple Sharpe (rf≈0).
+  - Add a small summary snippet to the README once populated.
+
+- **Portfolio view**
+  - Compare **equal-weight vs cap-weight** baskets; support monthly/quarterly rebalancing and a transaction-cost toggle.
+  - Plot rolling **beta** and **correlation** vs `^GSPC` (36/60-day windows).
+
+- **Productize**
+  - Ship a tiny **Streamlit** app to pick tickers/dates and auto-generate the two charts + metrics table.
+  - Optional: GitHub Actions job to **refresh figures weekly** and cache raw prices to `/data`.
+
+- **Analysis extensions**
+  - Add drawdown curve and recovery times.
+  - Include moving-average signals (50/200d), rolling volatility bands, and a simple regime flag.
+  - Sector/factor tilt quick view (Tech/Financials/Staples weight and contribution to risk).
+
+---
+
+## Notes
+
+- Prefer **Adj Close** for total-return proxy (split/dividend adjusted).  
+- Do **not** forward-fill price gaps before computing returns—this inflates correlation and distorts drawdowns.  
+- Correlations are **sample- and frequency-dependent** (daily ≠ weekly/monthly); interpret in context.  
+- Yahoo/third-party data can change or be delayed; if a call fails, use the **Stooq fallback** (`pandas-datareader`).  
+- Reproducibility: pin dependencies in `requirements.txt` and save figures into `/results` so the README renders consistently.
+
+---
+
+## Disclaimer
+
+This project is for **educational purposes only**.  
+Nothing here is investment, legal, or tax advice. Markets involve risk, including loss of principal. Always verify data and methods before making decisions.
