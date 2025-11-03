@@ -40,6 +40,7 @@ This repo shows a **fast, reproducible path** from data → returns → correlat
 ## Results (highlights)
 
 **(1) Share price trend (2021–2024)**  
+<img width="914" height="457" alt="image" src="https://github.com/user-attachments/assets/69163632-16c3-40d9-ab93-dc10e556e122" />
 
 
 **(2) Correlation heatmap (daily returns)**  
