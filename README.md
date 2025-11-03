@@ -44,6 +44,7 @@ This repo shows a **fast, reproducible path** from data → returns → correlat
 
 
 **(2) Correlation heatmap (daily returns)**  
+<img width="926" height="527" alt="image" src="https://github.com/user-attachments/assets/3b498637-ec9e-4f9c-aa2b-7fff8e10a57c" />
 
 
 **What the plots show (from your outputs):**
